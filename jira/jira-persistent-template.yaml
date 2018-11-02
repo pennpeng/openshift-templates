@@ -1,0 +1,167 @@
+apiVersion: v1
+kind: Template
+metadata:
+  name: jira
+objects:
+- apiVersion: v1
+  kind: DeploymentConfig
+  metadata:
+    labels:
+      run: jira
+    name: jira
+  spec:
+    replicas: 1
+    selector:
+      run: jira
+    strategy:
+      type: Recreate
+    template:
+      metadata:
+        labels:
+          run: jira
+      spec:
+        containers:
+        - env:
+          - name: JVM_XMX
+            value: 2048m
+          - name: JVM_XMS
+            value: 1024m
+          image: docker.io/xhuaustc/jira-software:7.11.0
+          imagePullPolicy: IfNotPresent
+          name: jira
+          volumeMounts:
+          - mountPath: /var/atlassian/jira
+            name: volume-7iy6x
+          - mountPath: /opt/atlassian/jira/logs
+            name: volume-zsyly
+        volumes:
+        - name: volume-7iy6x
+          persistentVolumeClaim:
+            claimName: jira
+        - name: volume-zsyly
+          persistentVolumeClaim:
+            claimName: jira-log
+    triggers:
+    - type: ConfigChange
+- apiVersion: v1
+  kind: DeploymentConfig
+  metadata:
+    labels:
+      run: mysql-jira
+    name: mysql-jira
+  spec:
+    replicas: 1
+    selector:
+      run: mysql-jira
+    strategy:
+      type: Recreate
+    template:
+      metadata:
+        labels:
+          run: mysql-jira
+      spec:
+        containers:
+        - env:
+          - name: MYSQL_USER
+            value: jira
+          - name: MYSQL_PASSWORD
+            value: jira
+          - name: MYSQL_DATABASE
+            value: jira
+          - name: MYSQL_ROOT_PASSWORD
+            value: jira
+          image: docker.io/xhuaustc/atlassian-mysql:5.7
+          imagePullPolicy: IfNotPresent
+          name: mysql-jira
+          volumeMounts:
+          - mountPath: /var/lib/mysql
+            name: volume-uiwfa
+        volumes:
+        - name: volume-uiwfa
+          persistentVolumeClaim:
+            claimName: mysql-jira-data
+    triggers:
+    - type: ConfigChange
+- apiVersion: v1
+  kind: Service
+  metadata:
+    labels:
+      run: jira
+    name: jira
+  spec:
+    ports:
+    - port: 8080
+      protocol: TCP
+      targetPort: 8080
+    selector:
+      run: jira
+    type: ClusterIP
+- apiVersion: v1
+  kind: Service
+  metadata:
+    labels:
+      run: mysql-jira
+    name: mysql-jira
+  spec:
+    ports:
+    - port: 3306
+      protocol: TCP
+      targetPort: 3306
+    selector:
+      run: mysql-jira
+    type: ClusterIP
+- apiVersion: v1
+  kind: Route
+  metadata:
+    annotations:
+      haproxy.router.openshift.io/timeout: 3000s
+    labels:
+      run: jira
+    name: jira
+  spec:
+    port:
+      targetPort: 8080
+    to:
+      kind: Service
+      name: jira
+      weight: 100
+    wildcardPolicy: None
+- apiVersion: v1
+  kind: PersistentVolumeClaim
+  metadata:
+    annotations:
+      volume.beta.kubernetes.io/storage-class: ceph-rbd-sc
+      volume.beta.kubernetes.io/storage-provisioner: kubernetes.io/rbd
+    name: jira
+  spec:
+    accessModes:
+    - ReadWriteOnce
+    resources:
+      requests:
+        storage: 20Gi
+- apiVersion: v1
+  kind: PersistentVolumeClaim
+  metadata:
+    annotations:
+      volume.beta.kubernetes.io/storage-class: ceph-rbd-sc
+      volume.beta.kubernetes.io/storage-provisioner: kubernetes.io/rbd
+    name: jira-log
+  spec:
+    accessModes:
+    - ReadWriteOnce
+    resources:
+      requests:
+        storage: 10Gi
+- apiVersion: v1
+  kind: PersistentVolumeClaim
+  metadata:
+    annotations:
+      volume.beta.kubernetes.io/storage-class: ceph-rbd-sc
+      volume.beta.kubernetes.io/storage-provisioner: kubernetes.io/rbd
+    name: mysql-jira-data
+  spec:
+    accessModes:
+    - ReadWriteOnce
+    resources:
+      requests:
+        storage: 10Gi
