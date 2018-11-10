@@ -4,6 +4,10 @@ metadata:
   name: easy-mock
 objects:
 - apiVersion: v1
+  kind: ServiceAccount
+  metadata:
+    name: easymock
+- apiVersion: v1
   kind: DeploymentConfig
   metadata:
     labels:
