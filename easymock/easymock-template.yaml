@@ -38,6 +38,7 @@ objects:
             defaultMode: 420
             name: easy-mock
           name: easy-mock-t75hs
+        serviceAccount: easymock
     triggers:
     - type: ConfigChange
 - apiVersion: v1
