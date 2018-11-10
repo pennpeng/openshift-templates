@@ -75,6 +75,7 @@ objects:
             name: mongo-1
           - mountPath: /data/db
             name: mongo-2
+        serviceAccount: easymock
         dnsPolicy: ClusterFirst
         restartPolicy: Always
         schedulerName: default-scheduler
@@ -116,6 +117,7 @@ objects:
           volumeMounts:
           - mountPath: /data
             name: redis-volume-1
+        serviceAccount: easymock
         volumes:
         - emptyDir: {}
           name: redis-volume-1
