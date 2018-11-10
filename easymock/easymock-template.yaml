@@ -49,7 +49,7 @@ objects:
   kind: DeploymentConfig
   metadata:
     labels:
-      app: mongo
+      app: easy-mock
     name: mongo
   spec:
     replicas: 1
@@ -93,7 +93,7 @@ objects:
   kind: DeploymentConfig
   metadata:
     labels:
-      app: redis
+      app: easy-mock
     name: redis
   spec:
     replicas: 1
@@ -141,7 +141,7 @@ objects:
   kind: Service
   metadata:
     labels:
-      app: mongo
+      app: easy-mock
     name: mongo
   spec:
     ports:
@@ -157,7 +157,7 @@ objects:
   kind: Service
   metadata:
     labels:
-      app: redis
+      app: easy-mock
     name: redis
   spec:
     ports:
