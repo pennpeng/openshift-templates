@@ -193,7 +193,6 @@ objects:
     resources:
       requests:
         storage: 10Gi
-    volumeName: mock-mongo-data-pv
 - apiVersion: v1
   data:
     default.json: "{\r\n  \"port\": 7300,\r\n  \"host\": \"0.0.0.0\",\r\n  \"pageSize\":
